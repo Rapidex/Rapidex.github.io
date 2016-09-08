@@ -1,4 +1,4 @@
-# [Rapidex.io](https://rapidex.io)
+# [Rapidex.io](www.rapidex.io)
 
 ### The Minimal Mobile Pokedex
 
@@ -20,4 +20,4 @@ Feel free to contribute by submitting pull requests to the dev branch!
 
 
 ## Created By
-[Jared Jones](jaredjones.me)
+[Jared Jones](www.jaredjones.me)
