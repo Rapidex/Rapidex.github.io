@@ -13,5 +13,11 @@ Rapidex is based ontop of the [PokeAPI](https://pokeapi.co).
 - full ordered list of pokemon
 - and more!
 
+
+### To Contribute
+
+Feel free to contribute by submitting pull requests to the dev branch!
+
+
 ## Created By
 [Jared Jones](https://jaredjones.me)
