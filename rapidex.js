@@ -1,10 +1,4 @@
 /* TODO :
-    -add client side caching of pokemon they look up in a session so if they re-look them up it doesn't have to make extranious calls to the backend (web-storage)
-    store: localstorage.setItem('key', JSON.stringify({name: 'value'}));
-    get: JSON.parse(localStorage.getItem('key')).name;
-    -set up JSON objects for each pokemon for storage
-    {name: 'name', id: '', type: 'type', img: 'url'}
-    
     -add section for what types they are good against
     
     -suggesting pokemon based on what is typed or some system of "did you mean" if they put in an improper name
@@ -14,17 +8,15 @@
     {"name": "x", "id":"y", "sprite": "z", "types": ["name": "1","name": "1"]}
 */
 
-var xmlhttp = new XMLHttpRequest();
-var baseurl = "http://pokeapi.co/api/v2/pokemon/";
-var localStorageBool = false;
+let xmlhttp = new XMLHttpRequest();
+let baseurl = "http://pokeapi.co/api/v2/pokemon/";
+let localStorageBool = false;
+let currentID = -1;
 
 window.onload = function () {
     if (typeof(Storage) !== "undefined") {
         localStorageBool = true;
     } 
-    //setup event listeners for back and next arrows to call a modified pokeSearch
-    //document.getElementById("back").addEventListener("click", pokeSearch);
-    //document.getElementById("next").addEventListener("click", pokeSearch);
     document.getElementById("searchButton").addEventListener("click", pokeSearch);
     document.getElementById("searchBar").addEventListener("keyup", function (event) {
         event.preventDefault();
@@ -39,18 +31,7 @@ function pokeSearch() {
     //grab the pokemon they search for
     var pokemon = document.getElementById("searchBar").value.lowerString();
     var currentShowing = document.getElementById("pokeName").innerHTML.lowerString();
-//    //test if they are re-searching for whats already there to prevent another api call
-//    if(notifier === 0) {
-//        pokemon = document.getElementById("searchBar").value.lowerString();
-//        var currentShowing = document.getElementById("pokeName").innerHTML.lowerString();
-//    } else if (notifier === 1) {
-//        //get the previous pokemon
-//        var id = document.getElementById("pokeID").innerHTML;
-//        pokemon = id - 1;
-//    } else {
-//        var id = document.getElementById("pokeID").innerHTML;
-//        pokemon = id + 1;
-//    }
+    //test if they are re-searching for whats already there to prevent another api call
     console.log(pokemon);
     if (!(pokemon === currentShowing)) {
         //begin setup to bring in the new data
@@ -107,9 +88,8 @@ function pokeDisplay(json) {
     console.log(json.name);
     var name = json.name.capitalizeString();
     var weaknesses = "";
-    
-    //var urls = [];
     var formattedTypes = [];
+    
     //place information we already have
     document.getElementById("pokeDisplay").style.display = "block";
     document.getElementById("pokeName").innerHTML = name;
@@ -142,25 +122,23 @@ function localType(pTypes) {
     var resistances = [];
     var immunities = []
     //loop through the types the pokemon displays
-    for (i = 0; i < pTypes.length; i++) {
+    for (var i in pTypes) {
         var color;
         //use JSON to gather more data on the type
-        for (j = 0; j < typeJSON.types.length; j++) {
+        for (var j in typeJSON.types) {
             var type = typeJSON.types[j];
             if (pTypes[i].name === type.name) {
                 color = type.color;
                 //gather the type weaknesses the pokemon displays
-                for (w = 0; w < type.effects.weak_to.length; w++) {
-                    allWeaknesses.push(type.effects.weak_to[w]);
-                }
-                //gather the type resistances the pokemon displays
-                for(r = 0; r < type.effects.resistant_to.length; r++){ 
-                    resistances.push(type.effects.resistant_to[r]);
-                } 
-                //gather the type immunities the pokemon displays
-                for (im =0; im < type.effects.immune_to.length; im++) {
-                    immunities.push(type.effects.immune_to[im]);
-                }
+                for (var weak of type.effects.weak_to) {
+                     allWeaknesses.push(weak);
+                 }
+                 for (var resistant of type.effects.resistant_to) {
+                     resistances.push(resistant);
+                 }
+                 for (var immune of type.effects.immune_to) {
+                     immunities.push(immune);
+                 }
             }
         }
         //display the main types on the page
@@ -186,7 +164,7 @@ function displayTypeWeaknesses(weaknesses, resistances, immunities) {
     var showing = 0;
     //var pokeWeak = document.getElementById("weaknesses");
     //calculate which weaknesses will be displayed (mostly for 2 typed pokemon)
-    for (i = 0; i < weaknesses.length; i++) {
+    for (var i in weaknesses) {
         var found = false;
         //see if the type is overlapped b/w the pokemons types
         for (j = 0; j < alreadyDisplayed.length; j++) {
@@ -201,12 +179,12 @@ function displayTypeWeaknesses(weaknesses, resistances, immunities) {
             //note that we already checked this one whether we are resistant or not
             alreadyDisplayed.push(weaknesses[i]); 
             //loop through resistances and then immunities to filter out wrong weaknesses
-            for (k = 0; k < resistances.length; k++) {
+            for (var k in resistances) {
                 if(weaknesses[i] === resistances[k]) {
                     typeInconsistency = true;
                 }
             }
-            for (im = 0; im < immunities.length; im++) {
+            for (var im in immunities) {
                 if(weaknesses[i] === immunities[im]) {
                     typeInconsistency = true;
                 }
@@ -216,7 +194,7 @@ function displayTypeWeaknesses(weaknesses, resistances, immunities) {
                 weaknessLI.className = "type";
                 weaknessLI.innerHTML = weaknesses[i];
                 //weaknessLI.style.background = getTypeColor(weaknesses[i]);
-                 for (c = 0; c < typeJSON.types.length; c++) {
+                 for (var c in typeJSON.types) {
                     if (typeJSON.types[c].name === weaknesses[i]) {
                         weaknessLI.style.background = typeJSON.types[c].color;
                     }
